@@ -5,3 +5,8 @@ linux系统：ubuntu
 1.设置静态ip：
  vi /etc/sysconfig/network-scripts/ifcfg-ens33
  systemctl restart network
+
+2.centos启动从图形界面进入改为从命令行界面进
+[root@192 devtoollib]# systemctl set-default multi-user.target
+Removed symlink /etc/systemd/system/default.target.
+Created symlink from /etc/systemd/system/default.target to /usr/lib/systemd/system/multi-user.target.
