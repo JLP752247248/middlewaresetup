@@ -10,3 +10,7 @@ linux系统：ubuntu
 [root@192 devtoollib]# systemctl set-default multi-user.target
 Removed symlink /etc/systemd/system/default.target.
 Created symlink from /etc/systemd/system/default.target to /usr/lib/systemd/system/multi-user.target.
+
+
+scp -r  /opt/soft/hadoop-3.2.1/etc root@192.168.137.152:/opt/soft/hadoop-3.2.1/
+rm -rf /opt/soft/hadoop-3.2.1/etc
