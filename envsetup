@@ -16,3 +16,37 @@ scp -r  root@192.168.137.151:/opt/soft/hadoop-3.2.1/etc /opt/soft/hadoop-3.2.1/
 
 
 hdfs namenode -format hadoop
+
+hdfs dfsadmin -report
+
+
+关闭firewall：
+systemctl stop firewalld.service #停止firewall
+systemctl disable firewalld.service #禁止firewall开机启动
+firewall-cmd --state #查看默认防火墙状态（关闭后显示notrunning，开启后显示running）
+
+CENTOS7主机名永久生效
+ hostnamectl set-hostname hsotname
+ 
+ 
+ 设置时区（CentOS 7）
+先执行命令timedatectl status|grep 'Time zone'查看当前时区，如果不是中国时区（Asia/Shanghai），则需要先设置为中国时区，否则时区不同会存在时差。
+#已经是Asia/Shanghai，则无需设置
+timedatectl status|grep 'Time zone'
+执行下面的命令设置时区
+#设置硬件时钟调整为与本地时钟一致
+timedatectl set-local-rtc 1
+#设置时区为上海
+timedatectl set-timezone Asia/Shanghai
+使用ntpdate同步时间
+目前比较常用的做法就是使用ntpdate命令来同步时间，使用方法如下：
+
+#安装ntpdate
+yum -y install ntpdate
+#同步时间
+ntpdate -u  pool.ntp.org
+#同步完成后,date命令查看时间是否正确
+date
+
+
+
