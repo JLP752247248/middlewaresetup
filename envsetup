@@ -2,6 +2,10 @@
 linux系统：ubuntu
 四台机器配置
 
+centos7 安装jdk
+rpm -qa | grep java
+rpm -e --nodeps xxx
+
 1.设置静态ip：
  vi /etc/sysconfig/network-scripts/ifcfg-ens33
  systemctl restart network
