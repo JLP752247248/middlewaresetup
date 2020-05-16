@@ -52,5 +52,8 @@ ntpdate -u  pool.ntp.org
 #同步完成后,date命令查看时间是否正确
 date
 
-
+#机器信任：
+cd ~/.ssh
+ssh-keygen -t rsa
+scp -r id_rsa.pub slave3:/root/.ssh/authorized_keys
 
