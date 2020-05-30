@@ -1,0 +1,153 @@
+
+将expect和tcl的软件包下载放到/usr/local/src目录下，解压tcl，进入tcl解压目录，然后进入unix目录进行编译安装
+1[root@server-202 ~]# cd /usr/local/src/
+[root@server-202 src]# tar -zvxf tcl8.4.11-src.tar.gz
+[root@server-202 src]# cd tcl8.4.11/unix
+[root@server-202 unix]# ./configure
+[root@server-202 unix]# make && make install
+  
+安装expect
+[root@server-202 src]# tar -zvxf expect-5.43.0.tar.gz
+[root@server-202 src]# cd expect-5.43.0
+[root@server-202 expect-5.43.0]# ./configure --with-tclinclude=/usr/local/src/tcl8.4.11/generic --with-tclconfig=/usr/local/lib/
+[root@server-202 expect-5.43.0]# make && make install
+  
+安装完成后进行测试
+[root@server-202 ~]# expect
+expect1.1>
+  
+[root@server-202 ~]# which expect
+/usr/local/bin/expect
+  
+做个expect执行文件的软件
+[root@server-202 ~]# ln -s /usr/local/bin/expect /usr/bin/expect
+[root@server-202 ~]# ll /usr/bin/expect
+  jiang
+批量实现信任关系的脚本如下：
+[root@server-202 ~]# vim /opt/ssh_auth.sh
+#!/bin/sh
+DEST_USER=$1
+PASSWORD=$2
+HOSTS_FILE=$3
+if [ $# -ne 3 ]; then
+    echo "Usage:"
+    echo "$0 remoteUser remotePassword hostsFile"
+    exit 1
+fi
+机器信任
+     
+SSH_DIR=~/.ssh
+SCRIPT_PREFIX=./tmp
+echo ===========================
+  
+# 1. prepare  directory .ssh
+mkdir $SSH_DIR
+chmod 700 $SSH_DIR
+    
+# 2. generat ssh key
+TMP_SCRIPT=$SCRIPT_PREFIX.sh
+echo  "#!/usr/bin/expect">$TMP_SCRIPT
+echo  "spawn ssh-keygen -b 1024 -t rsa">>$TMP_SCRIPT
+echo  "expect *key*">>$TMP_SCRIPT
+echo  "send \r">>$TMP_SCRIPT
+if [ -f $SSH_DIR/id_rsa ]; then
+    echo  "expect *verwrite*">>$TMP_SCRIPT
+    echo  "send y\r">>$TMP_SCRIPT
+fi
+echo  "expect *passphrase*">>$TMP_SCRIPT
+echo  "send \r">>$TMP_SCRIPT
+echo  "expect *again:">>$TMP_SCRIPT
+echo  "send \r">>$TMP_SCRIPT
+echo  "interact">>$TMP_SCRIPT
+    
+chmod +x $TMP_SCRIPT
+    
+/usr/bin/expect $TMP_SCRIPT
+rm $TMP_SCRIPT
+    
+# 3. generat file authorized_keys
+cat $SSH_DIR/id_rsa.pub>>$SSH_DIR/authorized_keys
+    
+# 4. chmod 600 for file authorized_keys
+chmod 600 $SSH_DIR/authorized_keys
+echo ===========================
+  
+# 5. copy all files to other hosts
+for ip in $(cat $HOSTS_FILE)  
+do
+    if [ "x$ip" != "x" ]; then
+        echo -------------------------
+        TMP_SCRIPT=${SCRIPT_PREFIX}.$ip.sh
+        # check known_hosts
+        val=`ssh-keygen -F $ip`
+        if [ "x$val" == "x" ]; then
+            echo "$ip not in $SSH_DIR/known_hosts, need to add"
+            val=`ssh-keyscan $ip 2>/dev/null`
+            if [ "x$val" == "x" ]; then
+                echo "ssh-keyscan $ip failed!"
+            else
+                echo $val>>$SSH_DIR/known_hosts
+            fi
+        fi
+        echo "copy $SSH_DIR to $ip"
+                    
+        echo  "#!/usr/bin/expect">$TMP_SCRIPT
+        echo  "spawn scp -r  $SSH_DIR $DEST_USER@$ip:~/">>$TMP_SCRIPT
+        echo  "expect *assword*">>$TMP_SCRIPT
+        echo  "send $PASSWORD\r">>$TMP_SCRIPT
+        echo  "interact">>$TMP_SCRIPT
+            
+        chmod +x $TMP_SCRIPT
+        #echo "/usr/bin/expect $TMP_SCRIPT" >$TMP_SCRIPT.do
+        #sh $TMP_SCRIPT.do&
+        
+        /usr/bin/expect $TMP_SCRIPT
+        rm $TMP_SCRIPT
+        echo "copy done."                
+    fi
+done
+    
+echo done.
+  
+  
+在上面脚本文件的同目录下新建名为host的文件，将要建立ssh互信的机器名或ip地址添加到该文件中，每个机器名或ip占一行，如：
+[root@server-202 ~]# vim /opt/host
+192.168.10.202
+192.168.10.203
+192.168.10.205
+192.168.10.206
+192.168.10.207
+192.168.10.208
+  
+最后就可以运行这个脚本ssh_auth.sh文件，ssh_auth.sh接受三个参数，远程机器用户名、密码和host文件名（相对路径或绝对路径均可）。
+[root@server-202 ~]# sh /opt/ssh_auth.sh root kevin123456 /opt/host
+  
+然后查看下其他服务器，发现.ssh目录下的文件和192.168.10.202机器的.ssh目录下的文件一致。
+最后就可以在这些机器之间进行相互信任的ssh无密码跳转登录了！
+  
+==========================================================================
+注意：上面脚本针对的是服务器ssh端口是22的情况，如果ssh是非22端口，比如是22222端口。
+则只需要在ssh_auth.sh脚本中修改下面两行内容：
+[root@server-202 ~]# cp /opt/ssh_auth.sh /opt/ssh_auth.sh.bak
+[root@server-202 ~]# vim /opt/ssh_auth.sh              #注意下面一个小写p，一个大写P
+.......
+val=`ssh-keyscan $ip 2>/dev/null`
+修改为
+val=`ssh-keyscan -p 22222 $ip 2>/dev/null`
+.......
+echo  "spawn scp -r  $SSH_DIR $DEST_USER@$ip:~/">>$TMP_SCRIPT
+修改为
+echo  "spawn scp -P 22222 -r  $SSH_DIR $DEST_USER@$ip:~/">>$TMP_SCRIPT
+  
+[root@server-202 ~]# diff /opt/ssh_auth.sh /opt/ssh_auth.sh.bak
+57c57
+<             val=`ssh-keyscan -p 22222 $ip 2>/dev/null`
+---
+>             val=`ssh-keyscan $ip 2>/dev/null`
+67c67
+<         echo  "spawn scp -P 22222 -r  $SSH_DIR $DEST_USER@$ip:~/">>$TMP_SCRIPT
+---
+>         echo  "spawn scp -r  $SSH_DIR $DEST_USER@$ip:~/">>$TMP_SCRIPT
+  
+最后执行脚本，进行相互信任关系批量部署即可
+[root@server-202 ~]# sh /opt/ssh_auth.sh root kevin123456 /opt/host
