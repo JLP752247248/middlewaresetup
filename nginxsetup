@@ -5,3 +5,14 @@ yum install gcc-c++
 yum install -y pcre pcre-devel
 yum install -y zlib zlib-devel
 yum install -y openssl openssl-devel
+ ./configure --prefix=/usr/local/nginx
+ make
+ make install
+ cd ..
+ cd nginx-1.6.3/
+ ll
+ cd /usr/local/nginx/
+ ll
+ cd sbin/
+ ll
+ ./nginx 
