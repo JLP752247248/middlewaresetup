@@ -1,0 +1,7 @@
+yum install glibc.i686
+warning: /var/cache/yum/x86_64/7/bas
+
+yum install gcc-c++
+yum install -y pcre pcre-devel
+yum install -y zlib zlib-devel
+yum install -y openssl openssl-devel
