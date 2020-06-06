@@ -10,3 +10,58 @@ rpm -ivh mysql-community-client-5.7.30-1.el7.x86_64.rpm
 [mysql]
 default-character-set=utf8
 
+chown -R mysql:mysql /var/run/mysqld
+# 如果还报错，则进入下一步。
+# 关闭selinux.并重启。
+setenforce 0
+ 
+# 重启服务
+service mysqld restart
+ 
+  systemctl status mysqld.service
+ 卸载重装
+ rm -rf /etc/logrotate.d/mysql
+rm -rf /etc/selinux/targeted/active/modules/100/mysql
+rm -rf /etc/selinux/targeted/tmp/modules/100/mysql
+rm -rf /var/lib/mysql
+rm -rf /usr/bin/mysql
+rm -rf /usr/lib64/mysql
+rm -rf /usr/share/mysql
+rm -rf /data/mysql
+rm -rf /data/mysql/mysql
+rm -rf /data/mysql/share/mysql
+  rpm -e --nodeps  mysql-community-libs-5.7.30-1.el7.x86_64
+mysql-community-client-5.7.30-1.el7.x86_64
+rpm -e --nodeps mysql-community-common-5.7.30-1.el7.x86_64
+rpm -qa|grep -i mysql
+rpm -e --nodeps mysql-community-server-5.7.30-1.el7.x86_64
+rpm -qa|grep -i mysql
+rpm -e --nodeps mysql-community-client 
+rpm -e --nodeps mysql-community-client-5.7.30-1.el7.x86_64
+rpm -qa|grep -i mysql
+cd /home/jlp/packages/mysqlpack/
+ll
+rpm -ivh mysql-community-common-5.7.30-1.el7.x86_64.rpm 
+rpm -ivh mysql-community-libs-5.7.30-1.el7.x86_64.rpm 
+rpm -ivh mysql-community-client-5.7.30-1.el7.x86_64.rpm 
+rpm -ivh mysql-community-server-5.7.30-1.el7.x86_64.rpm 
+
+
+自动挂盘
+/dev/cdrom /mnt/cdrom iso9660 defaults 0 0
+
+说明：
+第一列： 设备或磁盘分区
+第二列： 挂载点
+第三列： 设备类型或文件系统类型
+第四列： 挂载选项，这里用来填写设置选项，各个选项用逗号隔开。详细选项请用命令 man mount 来查看。这里有个非常重要的关键字需要了解一下：defaults，它代表包含了选项rw,suid,dev,exec,auto,nouser和 async。
+第五列： dump选项，此处为1的话，表示要将整个<file sysytem>里的内容备份；为0的话，表示不备份。现在很少用到dump这个工具，在这里一般选0。
+第六列： 该选项用来指定如何使用fsck来检查硬盘。如果这里填0，则不检查；挂载点为 / 的（即根分区），必须在这里填写1，其他的都不能填写1。
+————————————————
+版权声明：本文为CSDN博主「奋斗, 拼」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/u011563666/java/article/details/79191719
+
+
+mysqld --initailize --user=mysql  --basedir=/usr --datadir=/data/mysql
+service mysqld start
+ set password for root@localhost = password('123456');
