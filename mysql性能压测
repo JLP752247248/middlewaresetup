@@ -7,3 +7,6 @@ rpm -ivh mysql-community-client-5.7.30-1.el7.x86_64.rpm
  mysqld --initialize --user=mysql
  systemctl start mysqld.service
   grep "password" /var/log/mysqld.log
+[mysql]
+default-character-set=utf8
+
