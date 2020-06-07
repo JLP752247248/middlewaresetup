@@ -83,3 +83,8 @@ vi /etc/fstab
 mysqld --initailize --user=mysql  --basedir=/usr --datadir=/data/mysql
 service mysqld start
  set password for root@localhost = password('123456');
+
+update mysql.user set Host='%' where user='root';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '123456';
+
+flush privileges;
