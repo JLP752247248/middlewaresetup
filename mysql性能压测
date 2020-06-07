@@ -46,8 +46,10 @@ rpm -ivh mysql-community-libs-5.7.30-1.el7.x86_64.rpm
 rpm -ivh mysql-community-client-5.7.30-1.el7.x86_64.rpm 
 rpm -ivh mysql-community-server-5.7.30-1.el7.x86_64.rpm 
 
-
+partprobe
+ mkfs -t xfs /etc/sda4
 自动挂盘
+vi /etc/fstab
 /dev/cdrom /mnt/cdrom iso9660 defaults 0 0
 
 说明：
