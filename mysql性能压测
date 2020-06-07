@@ -7,16 +7,32 @@ rpm -ivh mysql-community-client-5.7.30-1.el7.x86_64.rpm
  mysqld --initialize --user=mysql
  systemctl start mysqld.service
   grep "password" /var/log/mysqld.log
+[mysqld]
+datadir=/home/mysql
+character-set-server=utf8
+collation-server=utf8_general_ci
+validate-password=OFF
+socket=/var/lib/mysql/mysql.sock
+
+# Disabling symbolic-links is recommended to prevent assorted security risks
+symbolic-links=0
+
 [mysql]
 default-character-set=utf8
 
+[client]
+default-character-set=utf8
+
+
+
+SET PASSWORD = PASSWORD('123456');
 chown -R mysql:mysql /var/run/mysqld
 # 如果还报错，则进入下一步。
 # 关闭selinux.并重启。
-setenforce 0
- 
+需要修改selinux的配置（/etc/selinux/config文件），将 SELINUX=enforcing 改为SELINUX=disabled （不重启OS使其生效的命令 setenforce 0) 
+ 停止mysqld服务（systemctl stop mysqld.service 后使用  rsync -avz   /var/lib/mysql /data/  迁移数据，rsync 免除迁移目标目录的目录属主及权限等操作）
 # 重启服务
-service mysqld restart
+systemctl  start mysqld.service
  
   systemctl status mysqld.service
  卸载重装
