@@ -1,0 +1,22 @@
+./configure --prefix=/usr/local/postgresql
+
+
+
+
+关于pg执行计划
+
+explain select distinct course_id from course where course_term = 'Fal02';
+ 
+NOTICE:  QUERY PLAN:
+ 
+Unique  (cost=12223.09..12339.76 rows=4667 width=4)
+ 
+               -> Sort (cost=12223.09..12223.09 rows=46666 width=4)
+ 
+               ->  Seq Scan on course  (cost=0.00..8279.99 rows=46666 width=4)
+1.从下往上读
+2.explain报告查询的操作，开启的消耗，查询总的消耗，访问的行数 访问的平均宽度
+3.开启时间消耗是输出开始前的时间例如排序的时间
+4.消耗包括磁盘检索页，cpu时间 
+5.每一步的cost包括上一步的
+6.explain 不是真正的执行时间 只是得到查询执行的计划和估计的花费
