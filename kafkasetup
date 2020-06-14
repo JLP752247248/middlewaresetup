@@ -1,0 +1,12 @@
+安装准备
+jdk1.8
+zookeper
+kafka_2.12-2.5.0.tgz
+安装步骤
+1.配置
+
+./kafka-topics.sh --create --zookeeper hadoop1:2181 --replication-factor 2 --partitions 3 --topic testtopic
+./kafka-topics.sh  --list --zookeeper hadoop1:2181
+./kafka-topics.sh --describe --zookeeper hadoop1:2181 --topic testtopic
+./kafka-console-producer.sh --broker-list hadoop2:9092,hadoop3:9092 --topic testtopic
+./kafka-console-consumer.sh --zookeper hadoop1:2181 --from-beginning --topic testtopic
