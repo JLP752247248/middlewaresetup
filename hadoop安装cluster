@@ -85,3 +85,7 @@ cd ~/.ssh
 ssh-keygen -t rsa
 scp -r id_rsa.pub slave3:/root/.ssh/authorized_keys
 
+扩展datanode
+拷贝完对应的配置和安装包在扩展结点上/home/jlp/packages/hadoop-3.2.1/sbin/hadoop-daemon.sh start datanode
+扩展nodemanager
+拷贝完对应的配置和安装包在扩展结点上/home/jlp/packages/hadoop-3.2.1/sbin/yarn-daemon.sh start nodemanager
